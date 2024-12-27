@@ -14,7 +14,7 @@ A virtual assistant built in Python that I let AI make the code because I'm lazy
 
 ## Installation
 
-1. Make sure you have Python 3 installed.
+1. Make sure you have Python 3 & Venv installed.
 
 2. Create a virtual environment: `python3 -m venv .venv`
 
