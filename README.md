@@ -1,6 +1,6 @@
 # LAMBDA
 
-A virtual assistant built in Python that I let AI make the code because I'm lazy lol
+A virtual assistant built in Python that I let AI make the code because I'm lazy lol, and also because I'm curious to see if AI can manage to create a virtual assistant.
 
 ## Features
 
