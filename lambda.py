@@ -4,7 +4,7 @@ import wikipedia
 import wikipedia.exceptions
 
 # Define the version number
-VERSION = "0.1, Gaia"
+VERSION = "1.0.0, Gaia"
 
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
