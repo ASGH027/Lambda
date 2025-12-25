@@ -1,77 +1,112 @@
-import speech_recognition as sr
 import pyttsx3
 import wikipedia
-import wikipedia.exceptions
+import requests
+import subprocess
+import sys
 
-# Define the version number
-VERSION = "1.0.0, Gaia"
+# --- CONFIGURATION ---
+CURRENT_VERSION = "1.1"
+VERSION_CODENAME = "Helios"
+VERSION_CHECK_URL = "https://github.com/ASGH027/Lambda/blob/main/version.txt"
 
-recognizer = sr.Recognizer()
 engine = pyttsx3.init()
 
 def speak(text):
-    try:
-        engine.say(text)
-        engine.runAndWait()
-    except Exception as e:
-        print(f"Error speaking: {e}")
+    print(f"Assistant: {text}")
+    engine.say(text)
+    engine.runAndWait()
 
-def listen():
-    with sr.Microphone() as source:
-        print("Listening...")
-        try:
+def check_for_updates():
+    """Checks if the current version matches the remote version."""
+    try:
+        response = requests.get(VERSION_CHECK_URL, timeout=2)
+        if response.status_code == 200:
+            latest_version = response.text.strip()
+            if latest_version != CURRENT_VERSION:
+                return True, latest_version
+    except:
+        pass 
+    return False, CURRENT_VERSION
+
+def get_voice_input():
+    """Attempts to use the microphone. Falls back to text if PyAudio/SpeechRecognition fails."""
+    try:
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("\n[Listening...]")
+            recognizer.adjust_for_ambient_noise(source)
             audio = recognizer.listen(source)
-            text = recognizer.recognize_google(audio)
-            print("You said:", text)
-            return text
-        except sr.UnknownValueError:
-            print("Sorry, I didn't catch that.")
-            return ""
-        except sr.RequestError as e:
-            print(f"Could not request results from Google Speech Recognition service: {e}")
-            return ""
-        except Exception as e:
-            print(f"An unexpected error occurred during listening: {e}")
-            return ""
-
-
-def process_wikipedia(query):
-    try:
-        results = wikipedia.summary(query, sentences=2)
-        speak(results)
-    except wikipedia.exceptions.DisambiguationError as e:
-        speak(f"There are multiple results for {query}. Please be more specific. Options include: {', '.join(e.options)}")
-    except wikipedia.exceptions.PageError:
-        speak("I couldn't find any information on that.")
-    except Exception as e:
-        print(f"Error processing Wikipedia query: {e}")
-        speak("An unexpected error occurred while accessing Wikipedia.")
-
+            return recognizer.recognize_google(audio)
+    except (ImportError, Exception):
+        # This triggers if PyAudio is missing OR if there is a hardware error
+        return "fallback_to_text"
 
 def process_command(command):
-    command = command.lower()
-    if "hello" in command:
-        speak("Hello, how can I assist you today?")
-    elif "wikipedia" in command:
+    command = command.lower().strip()
+    if not command: return True
+
+    # --- WIKIPEDIA COMMAND ---
+    if "wikipedia" in command:
         query = command.replace("wikipedia", "").strip()
-        process_wikipedia(query)
+        speak(f"Searching Wikipedia for {query}...")
+        try:
+            summary = wikipedia.summary(query, sentences=2)
+            speak(summary)
+        except Exception:
+            speak("I couldn't find a clear result for that.")
+
+    # --- UPGRADE COMMAND ---
+    elif "upgrade" in command:
+        speak("Checking for system updates...")
+        try:
+            # Runs 'git pull' to download new code from your repository
+            result = subprocess.run(["git", "pull"], capture_output=True, text=True)
+            if "Already up to date" in result.stdout:
+                speak("Everything is already up to date.")
+            else:
+                speak("Files updated successfully. Please restart Helios.")
+                sys.exit()
+        except Exception:
+            speak("Automatic upgrade failed. Please ensure Git is installed.")
+
+    # --- VERSION COMMAND ---
     elif "version" in command:
-        speak(f"My current version is: {VERSION}") # Added version handling
-    elif "exit" in command:
-        speak("Goodbye!")
+        speak(f"I am running version {CURRENT_VERSION}, codename {VERSION_CODENAME}.")
+
+    elif "exit" in command or "quit" in command:
+        speak("Shutting down Helios. Goodbye!")
         return False
+    
     else:
-        speak("I'm not sure I understand. Can you please repeat?")
+        speak(f"I heard: {command}. I don't know how to do that yet.")
+    
     return True
 
 def main():
-    while True:
-        command = listen()
-        if command:
-            if not process_command(command):
-                break
+    # Update Check
+    is_outdated, latest = check_for_updates()
+    
+    print(f"--- Assistant v{CURRENT_VERSION} ({VERSION_CODENAME}) ---")
+    if is_outdated:
+        print(f"!!! UPDATE AVAILABLE: Version {latest} is out. Type 'upgrade' to fetch it. !!!\n")
+    
+    # Mode Selection
+    mode = input("Choose mode - [V]oice or [T]ext: ").lower()
+
+    running = True
+    while running:
+        if mode == 'v':
+            user_input = get_voice_input()
+            if user_input == "fallback_to_text":
+                print("\n[!] Microphone or PyAudio not detected. Switching to Text Mode.")
+                mode = 't'
+                continue
+            print(f"You (Voice): {user_input}")
+        else:
+            user_input = input("\nYou (Text): ")
+
+        running = process_command(user_input)
 
 if __name__ == "__main__":
     main()
-
-
