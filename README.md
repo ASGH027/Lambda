@@ -10,7 +10,9 @@ A virtual assistant built in Python that I let AI make the code because I'm lazy
 
 * Provides text-based responses plus with Text to Speech.
 
-* Can identify its version number. 
+* Can identify its version number.
+
+* Can upgrade without you reinstalling Lambda again. 
 
 ## Installation
 
@@ -20,7 +22,7 @@ A virtual assistant built in Python that I let AI make the code because I'm lazy
 
 3. Activate the virtual environment: `source .venv/bin/activate` (Linux/macOS) or `.venv\Scripts\activate` (Windows)
 
-4. Install dependencies using the virtual environment: `pip install SpeechRecognition pyttsx3 wikipedia pyaudio`
+4. Install dependencies using the virtual environment: `pip install pyttsx3 wikipedia requests SpeechRecognition`
 
 5. Run the assistant: `python3 lambda.py'
 
@@ -34,11 +36,13 @@ A virtual assistant built in Python that I let AI make the code because I'm lazy
 
 * Pyttsx3
 
+* Requests
+
 ## Contact & Extra
 
 If you have any questions and/or problems with my voice assistant, don't hesitate to contact me here on GitHub! :D
 
-For Linux, you will need ALSA (and in future versions, JACK too) working for my voice assistant to work properly.
+For Linux, you will need ALSA (and in future versions, JACK too probably?) working for my voice assistant to work properly.
 
 ## License
 
