@@ -1,4 +1,5 @@
-PyAudio==0.2.13
-pyttsx3==2.98
-SpeechRecognition==3.12.0
+PyAudio==0.2.14
+pyttsx3==2.99
+SpeechRecognition==3.14.4
 wikipedia==1.4.0
+requests==2.32.5
